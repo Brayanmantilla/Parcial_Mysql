@@ -159,6 +159,54 @@ where i.InvoiceDate > NOW() - INTERVAL 6 MONTH
 GROUP BY Nombre;
 
     -- • Encuentra el cliente que ha realizado la compra más cara en el último año.
+
+SELECT 
+    c.CustomerId,
+    CONCAT(c.FirstName, ' ', c.LastName) AS Cliente,
+    MAX(i.Total) AS MontoCompra
+FROM Customer c
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+WHERE i.InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+GROUP BY c.CustomerId, Cliente
+ORDER BY MontoCompra DESC
+LIMIT 1;
+
     -- • Lista los cinco álbumes con más canciones vendidas durante los últimos tres meses.
+
+SELECT 
+    a.AlbumId,
+    a.Title AS Album,
+    COUNT(il.TrackId) AS CancionesVendidas
+FROM Album a
+JOIN Track t ON a.AlbumId = t.AlbumId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+WHERE i.InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+GROUP BY a.AlbumId, Album
+ORDER BY CancionesVendidas DESC
+LIMIT 5;
+
     -- • Obtén la cantidad de canciones vendidas por cada género en el último mes.
+
+SELECT 
+    g.GenreId,
+    g.Name AS Genero,
+    COUNT(il.TrackId) AS CancionesVendidas
+FROM Genre g
+JOIN Track t ON g.GenreId = t.GenreId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+WHERE i.InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)
+GROUP BY g.GenreId, Genero
+ORDER BY CancionesVendidas DESC;
+
     -- • Lista los clientes que no han comprado nada en el último año.
+
+SELECT 
+    c.CustomerId,
+    CONCAT(c.FirstName, ' ', c.LastName) AS Cliente
+FROM Customer c
+LEFT JOIN Invoice i 
+    ON c.CustomerId = i.CustomerId 
+    AND i.InvoiceDate >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+WHERE i.InvoiceId IS NULL;
